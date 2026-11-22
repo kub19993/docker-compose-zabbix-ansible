@@ -1,0 +1,37 @@
+---
+- name: Установка и настройка Zabbix Agent
+  hosts: zabbix_agents
+  become: true
+  vars:
+    zabbix_server_ip: "192.168.0.102" # IP твоего сервера с Zabbix
+    zabbix_hostname: "ubuntu-server-107"
+
+  tasks:
+    - name: Установить Zabbix Agent из стандартного репозитория
+      ansible.builtin.apt:
+        name: zabbix-agent
+        state: present
+        update_cache: yes
+
+    - name: Настроить конфигурацию агента
+      ansible.builtin.lineinfile:
+        path: /etc/zabbix/zabbix_agentd.conf
+        regexp: "^{{ item.key }}="
+        line: "{{ item.key }}={{ item.value }}"
+      loop:
+        - { key: 'Server', value: "{{ zabbix_server_ip }}" }
+        - { key: 'ServerActive', value: "{{ zabbix_server_ip }}:10051" }
+        - { key: 'Hostname', value: "{{ zabbix_hostname }}" }
+      notify: Перезапустить Zabbix Agent
+
+    - name: Включить и запустить агент
+      ansible.builtin.systemd:
+        name: zabbix-agent
+        state: started
+        enabled: yes
+
+  handlers:
+    - name: Перезапустить Zabbix Agent
+      ansible.builtin.systemd:
+        name: zabbix-agent
+        state: restarted

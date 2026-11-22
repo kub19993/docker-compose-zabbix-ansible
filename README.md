@@ -28,11 +28,11 @@
     cd docker-compose-zabbix-ansible
 Запустите контейнеры:
 
-	bash
+bash
 docker compose up -d
 Дождитесь инициализации (1–2 минуты). При первом запуске MySQL создает базу, а Zabbix Server — схему. Если Zabbix падает с ошибкой MySQL connection failed, просто перезапустите его:
 
-	bash
+
 docker compose restart zabbix-server-mysql
 Проверьте работу: Откройте в браузере http://IP_ОСНОВНОГО_СЕРВЕРА:8080.
 
@@ -40,27 +40,27 @@ docker compose restart zabbix-server-mysql
 
 Пароль: zabbix
 
-	Часть 2: Установка агента через Ansible
+Часть 2: Установка агента через Ansible
 Настройте инвентарь: Откройте файл inventory.ini и укажите IP-адрес целевого сервера, логин и пароль пользователя для SSH-подключения.
 
-	ini
+ini
 [zabbix_agents]
 192.168.0.107 ansible_user=zaki ansible_ssh_pass=ваш_пароль ansible_become_pass=ваш_пароль ansible_python_interpreter=/usr/bin/python3
 Проверьте плейбук: Откройте install_agent.yml и убедитесь, что в переменной zabbix_server_ip указан IP вашего основного сервера (где запущен Docker).
 
-	yaml
+yaml
 vars:
   zabbix_server_ip: "192.168.0.102" # IP сервера с Zabbix
   zabbix_hostname: "ubuntu-server-107"
 Запустите плейбук:
 
-	bash
+bash
 ansible-playbook -i inventory.ini install_agent.yml
 Часть 3: Добавление хоста в веб-интерфейсе Zabbix
 После того как Ansible успешно установит агент, нужно добавить хост в Zabbix, чтобы он начал собирать данные.
 
 	
-	Зайдите в веб-интерфейс Zabbix.
+Зайдите в веб-интерфейс Zabbix.
 
 Перейдите в Data collection -> Hosts.
 
